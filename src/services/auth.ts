@@ -1,38 +1,80 @@
-import { supabase } from '../lib/supabase';
-import { User } from '../types/database';
+const API_URL = 'http://localhost:3000/api';
+
+interface UserData {
+  full_name: string;
+  user_type: 'business' | 'influencer';
+  profile_data: BusinessFormData | InfluencerFormData;
+  company_name?: string; // Optional for influencers
+  industry?: string; // Optional for influencers
+  website_url?: string; // Optional for influencers
+  interests?: string[]; // Optional for business
+  collab_types?: string[]; // Optional for business
+  social_platforms?: string[]; // Optional for influencers
+  follower_count?: number; // Optional for influencers
+  content_niche?: string[]; // Optional for influencers
+  content_types?: string[]; // Optional for influencers
+}
 
 export const authService = {
-  async signUp(email: string, password: string, userData: Omit<User, 'id' | 'created_at'>) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: userData
-      }
-    });
+  async signUp(email: string, password: string, userData: UserData) {
+    try {
+      console.log('Sending registration data:', { email, password, ...userData });
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: userData.full_name,
+          user_type: userData.user_type,
+          profile_data: userData.profile_data
+        }),
+      });
 
-    if (error) throw error;
-    return data;
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Registration error:', errorData);
+        throw new Error(errorData.error || 'Registration failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      return data;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
   },
 
   async signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (error) throw error;
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('token', data.token);
     return data;
   },
 
   async signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    localStorage.removeItem('token');
   },
 
   async getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (error) throw error;
-    return user;
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    // Implement token verification if needed
+    return null;
   }
 }; 

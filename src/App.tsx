@@ -12,6 +12,9 @@ import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
 import RegistrationSuccess from './pages/RegistrationSuccess';
+import SignIn from './pages/SignIn';
+import ProtectedRoute from './components/ProtectedRoute';
+import Workspace from './pages/Workspace';
 
 function App() {
   return (
@@ -28,6 +31,8 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/register/:type" element={<Register />} />
         <Route path="/registration-success" element={<RegistrationSuccess />} />
+        <Route path="/login" element={<SignIn />} />
+        <Route path="/workspace" element={<ProtectedRoute><Workspace /></ProtectedRoute>} />
       </Routes>
       <Footer />
     </div>

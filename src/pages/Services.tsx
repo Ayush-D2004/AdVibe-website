@@ -1,5 +1,6 @@
-import React from 'react';
+// import React from 'react';
 import { BarChart2, Zap, Users, MessageSquare, Target, PieChart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 function Services() {
   const services = [
@@ -127,12 +128,12 @@ function Services() {
               </div>
               <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
                 <div className="inline-flex rounded-md shadow">
-                  <a
-                    href="/contact"
+                  <Link
+                    to="/#join-now-section"
                     className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-purple-50"
                   >
                     Get Started
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

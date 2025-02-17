@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, BarChart2, Users, Zap } from 'lucide-react';
 import { JoinSection } from '../components/registration/JoinSection';
+import { Link } from 'react-router-dom';
 
 function Home() {
   // Original smooth scroll functionality
@@ -85,9 +86,12 @@ function Home() {
                   </a>
                 </div>
                 <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
-                  <a href="#" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                  <Link
+                    to="/services"
+                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-purple-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
+                  >
                     Learn More
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Building2, Globe, Users, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Building2, Globe, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { authService } from '../../services/auth';
 import { cn } from '../../lib/utils';
 
@@ -60,6 +60,7 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
   const [error, setError] = useState('');
   const [step, setStep] = useState(1);
   const totalSteps = 4;
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
   const [formData, setFormData] = useState<BusinessFormData | InfluencerFormData>(
     type === 'business' 
@@ -78,16 +79,65 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
         }
   );
 
+  useEffect(() => {
+    if (error) {
+      console.log('Error:', error);
+    }
+  }, [error]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
     
+    // Reset missing fields
+    setMissingFields([]);
+
+    // Validate required fields
+    const currentMissingFields = [];
+    if (!formData.name) currentMissingFields.push('Full Name');
+    if (!formData.email) currentMissingFields.push('Email');
+    if (!formData.password) currentMissingFields.push('Password');
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      currentMissingFields.push('Invalid Email Format');
+    }
+
+    // Password validation
+    if (formData.password && formData.password.length < 8) {
+      currentMissingFields.push('Password must be at least 8 characters long');
+    }
+
+    if (type === 'business') {
+      if (!(formData as BusinessFormData).companyName) currentMissingFields.push('Company Name');
+      if (!(formData as BusinessFormData).industry) currentMissingFields.push('Industry');
+    } else {
+      if (!(formData as InfluencerFormData).socialPlatforms.length) currentMissingFields.push('Social Platforms');
+      if (!(formData as InfluencerFormData).followerCount) currentMissingFields.push('Follower Count');
+    }
+
+    if (currentMissingFields.length > 0) {
+      setMissingFields(currentMissingFields);
+      setError('Please fill in the required fields.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    console.log('Submitting form data:', {
+      email: formData.email,
+      password: formData.password,
+      full_name: formData.name,
+      user_type: type,
+      profile_data: formData
+    });
+    
     try {
       await authService.signUp(formData.email, formData.password, {
         full_name: formData.name,
         user_type: type,
-        email: formData.email
+        profile_data: formData
       });
       navigate('/registration-success');
     } catch (error) {
@@ -514,6 +564,16 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
           {error}
+        </div>
+      )}
+      {missingFields.length > 0 && (
+        <div className="mb-4 p-3 bg-yellow-100 text-yellow-700 rounded-md">
+          <p>Please fill in the following required fields:</p>
+          <ul>
+            {missingFields.map((field, index) => (
+              <li key={index}>{field}</li>
+            ))}
+          </ul>
         </div>
       )}
 

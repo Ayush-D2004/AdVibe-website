@@ -7,7 +7,7 @@ import About from './pages/About';
 import Services from './pages/Services';
 import Community from './pages/Community';
 import BrandSolutions from './pages/BrandSolutions';
-import SuccessStories from './pages/SuccessStories';
+// import SuccessStories from './pages/SuccessStories'; // Commenting out Success Stories page
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Register from './pages/Register';
@@ -15,6 +15,7 @@ import RegistrationSuccess from './pages/RegistrationSuccess';
 import SignIn from './pages/SignIn';
 import ProtectedRoute from './components/ProtectedRoute';
 import Workspace from './pages/Workspace';
+import ProfileSettings from './pages/ProfileSettings';
 
 function App() {
   return (
@@ -39,12 +40,13 @@ function App() {
                 <Route path="/services" element={<Services />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/brands" element={<BrandSolutions />} />
-                <Route path="/stories" element={<SuccessStories />} />
+                {/* <Route path="/success-stories" element={<SuccessStories />} /> // Commented out Success Stories route */}
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/register/:type" element={<Register />} />
                 <Route path="/registration-success" element={<RegistrationSuccess />} />
                 <Route path="/login" element={<SignIn />} />
+                <Route path="/profile/:id" element={<ProfileSettings />} />
               </Routes>
               <Footer />
             </>

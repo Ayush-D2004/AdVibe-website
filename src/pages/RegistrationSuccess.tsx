@@ -1,8 +1,21 @@
-import React from 'react';
+// import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function RegistrationSuccess() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to workspace after a short delay
+    const timer = setTimeout(() => {
+      navigate('/workspace');
+    }, 3000); // Redirect after 3 seconds
+
+    return () => clearTimeout(timer); // Cleanup the timer
+  }, [navigate]);
+
   return (
     <main className="pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -16,7 +29,7 @@ function RegistrationSuccess() {
           </h1>
           
           <p className="text-xl text-gray-500 mb-8">
-            Thank you for joining AdVibe. We're reviewing your application and will be in touch soon.
+            Thank you for joining AdVibe. You will be redirected to your workspace shortly.
           </p>
 
           <div className="bg-gray-50 rounded-lg p-8 mb-8">

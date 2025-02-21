@@ -79,6 +79,12 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
         }
   );
 
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasNumber: false,
+  });
+
   useEffect(() => {
     if (error) {
       console.log('Error:', error);
@@ -139,7 +145,7 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
         user_type: type,
         profile_data: formData
       });
-      navigate('/registration-success');
+      navigate('/workspace');
     } catch (error) {
       setError('Registration failed. Please try again.');
     } finally {
@@ -147,9 +153,46 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
     }
   };
 
+  const validateFields = () => {
+    const currentMissingFields = [];
+    
+    // Validate required fields based on the current step
+    if (step === 1) {
+      if (!formData.name) currentMissingFields.push('Full Name');
+      if (!formData.email) currentMissingFields.push('Email');
+      if (!formData.password) currentMissingFields.push('Password');
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (formData.email && !emailRegex.test(formData.email)) {
+        currentMissingFields.push('Invalid Email Format');
+      }
+
+      // Password validation
+      if (formData.password && formData.password.length < 8) {
+        currentMissingFields.push('Password must be at least 8 characters long');
+      }
+    } else if (step === 2) {
+      if (type === 'business') {
+        if (!(formData as BusinessFormData).companyName) currentMissingFields.push('Company Name');
+        if (!(formData as BusinessFormData).industry) currentMissingFields.push('Industry');
+      } else {
+        if (!(formData as InfluencerFormData).socialPlatforms.length) currentMissingFields.push('Social Platforms');
+        if (!(formData as InfluencerFormData).followerCount) currentMissingFields.push('Follower Count');
+      }
+    }
+
+    setMissingFields(currentMissingFields);
+    return currentMissingFields.length === 0; // Return true if no missing fields
+  };
+
   const nextStep = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
+    if (validateFields()) {
+      if (step < totalSteps) {
+        setStep(step + 1);
+      }
+    } else {
+      setError('Please fill in the required fields.');
     }
   };
 
@@ -163,6 +206,20 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
     return array.includes(item)
       ? array.filter(i => i !== item)
       : [...array, item];
+  };
+
+  const validatePassword = (password: string) => {
+    setPasswordRequirements({
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasNumber: /\d/.test(password),
+    });
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setFormData({ ...formData, password: newPassword });
+    validatePassword(newPassword);
   };
 
   const renderProgressBar = () => (
@@ -240,7 +297,7 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
           <input
             type={showPassword ? "text" : "password"}
             value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            onChange={handlePasswordChange}
             className="block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 pr-10"
             required
           />
@@ -251,6 +308,17 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
           >
             {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
           </button>
+        </div>
+        <div className="mt-2 text-sm">
+          <p className={`flex items-center ${passwordRequirements.minLength ? 'text-green-600' : 'text-red-600'}`}>
+            At least 8 characters
+          </p>
+          <p className={`flex items-center ${passwordRequirements.hasUppercase ? 'text-green-600' : 'text-red-600'}`}>
+            At least one uppercase letter
+          </p>
+          <p className={`flex items-center ${passwordRequirements.hasNumber ? 'text-green-600' : 'text-red-600'}`}>
+            At least one number
+          </p>
         </div>
       </div>
     </div>

@@ -1,3 +1,6 @@
+import axios from 'axios';
+import { BusinessFormData, InfluencerFormData, UserUpdateData } from '../types'; // Adjust the path as necessary
+
 const API_URL = 'http://localhost:3000/api';
 
 interface UserData {
@@ -76,5 +79,13 @@ export const authService = {
 
     // Implement token verification if needed
     return null;
-  }
+  },
+
+  getUserById: async (id: string) => {
+    return await axios.get(`/api/users/${id}`);
+  },
+
+  updateUser: async (id: string, userData: UserUpdateData) => {
+    return await axios.put(`/api/users/${id}`, userData);
+  },
 }; 

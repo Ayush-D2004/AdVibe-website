@@ -188,22 +188,145 @@ app.post('/api/auth/login', (req: Request<{}, {}, LoginRequest>, res: Response) 
   });
 });
 
-// Add this endpoint to your existing code
+const MAX_RETRIES = 5;
+
+const runWithRetry = (query: string, params: any[], callback: (err: Error | null, row: any) => void) => {
+  let attempts = 0;
+
+  const executeQuery = () => {
+    db.get(query, params, (err, row) => {
+      if (err) {
+        if (err.message.includes('database is locked') && attempts < MAX_RETRIES) {
+          attempts++;
+          console.log(`Retrying query... Attempt ${attempts}`);
+          setTimeout(executeQuery, 100); // Wait 100ms before retrying
+        } else {
+          callback(err, null);
+        }
+      } else {
+        callback(null, row);
+      }
+    });
+  };
+
+  executeQuery();
+};
+
+// Add this endpoint to fetch counts of brands and influencers
 app.get('/api/stats', (req: Request, res: Response) => {
   const statsQuery = `
     SELECT 
-      (SELECT COUNT(*) FROM users WHERE user_type = 'business') AS brands,
-      (SELECT COUNT(*) FROM users WHERE user_type = 'influencer') AS influencers,
-      (SELECT COUNT(*) FROM campaigns) AS campaigns
+      (SELECT COUNT(*) FROM business_profiles) AS brands,
+      (SELECT COUNT(*) FROM influencer_profiles) AS influencers
   `;
 
-  db.get(statsQuery, [], (err: Error | null, row: any) => {
+  runWithRetry(statsQuery, [], (err, row) => {
     if (err) {
       console.error('Error fetching stats:', err);
       return res.status(500).json({ error: 'Failed to fetch stats' });
     }
-    res.json(row);
+    console.log('Fetched Stats:', row);
+    res.json({
+      brands: row.brands || 0,
+      influencers: row.influencers || 0,
+      campaigns: 0 // Placeholder for campaigns count
+    });
   });
+});
+
+app.get('/api/users', (req: Request, res: Response) => {
+  db.all('SELECT * FROM users', [], (err, rows) => {
+    if (err) {
+      console.error('Error fetching users:', err);
+      return res.status(500).json({ error: 'Failed to fetch users' });
+    }
+    res.json(rows);
+  });
+});
+
+// Check for missing business profile values
+app.get('/api/business-profiles/missing', (req: Request, res: Response) => {
+  db.all('SELECT * FROM business_profiles WHERE company_name IS NULL OR website_url IS NULL OR collab_types IS NULL', [], (err, rows) => {
+    if (err) {
+      console.error('Error fetching missing business profiles:', err);
+      return res.status(500).json({ error: 'Failed to fetch missing business profiles' });
+    }
+    res.json(rows);
+  });
+});
+
+// Check for missing influencer profile values
+app.get('/api/influencer-profiles/missing', (req: Request, res: Response) => {
+  db.all('SELECT * FROM influencer_profiles WHERE content_niche IS NULL OR content_types IS NULL', [], (err, rows) => {
+    if (err) {
+      console.error('Error fetching missing influencer profiles:', err);
+      return res.status(500).json({ error: 'Failed to fetch missing influencer profiles' });
+    }
+    res.json(rows);
+  });
+});
+
+// Update user profile endpoint
+app.put('/api/users/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { email, full_name, user_type, profile_data } = req.body;
+
+  // Validate required fields
+  if (!email || !full_name || !user_type || !profile_data) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // Update user information
+  db.run(
+    'UPDATE users SET email = ?, full_name = ?, user_type = ? WHERE id = ?',
+    [email, full_name, user_type, id],
+    function (err) {
+      if (err) {
+        console.error('Error updating user:', err);
+        return res.status(500).json({ error: 'Failed to update user' });
+      }
+
+      // Update profile data based on user type
+      if (user_type === 'business') {
+        db.run(
+          'UPDATE business_profiles SET company_name = ?, industry = ?, website_url = ?, interests = ?, collab_types = ? WHERE user_id = ?',
+          [
+            profile_data.company_name,
+            profile_data.industry,
+            profile_data.website_url,
+            JSON.stringify(profile_data.interests),
+            JSON.stringify(profile_data.collab_types),
+            id
+          ],
+          function (err) {
+            if (err) {
+              console.error('Error updating business profile:', err);
+              return res.status(500).json({ error: 'Failed to update business profile' });
+            }
+            res.json({ message: 'Profile updated successfully' });
+          }
+        );
+      } else {
+        db.run(
+          'UPDATE influencer_profiles SET social_platforms = ?, follower_count = ?, content_niche = ?, content_types = ? WHERE user_id = ?',
+          [
+            JSON.stringify(profile_data.social_platforms),
+            profile_data.follower_count,
+            JSON.stringify(profile_data.content_niche),
+            JSON.stringify(profile_data.content_types),
+            id
+          ],
+          function (err) {
+            if (err) {
+              console.error('Error updating influencer profile:', err);
+              return res.status(500).json({ error: 'Failed to update influencer profile' });
+            }
+            res.json({ message: 'Profile updated successfully' });
+          }
+        );
+      }
+    }
+  );
 });
 
 const PORT = 3000;

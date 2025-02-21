@@ -10,8 +10,8 @@ const Navbar = () => {
     { label: 'Services', href: '/services' },
     { label: 'Influencer Community', href: '/community' },
     { label: 'Brand Solutions', href: '/brands' },
-    { label: 'Success Stories', href: '/stories' },
-    { label: 'Blog', href: '/blog' },
+    // { label: 'Success Stories', href: '/stories' },
+    // { label: 'Blog', href: '/blog' },
     { label: 'Contact', href: '/contact' },
     { label: 'About', href: '/about' },
   ];
@@ -28,17 +28,17 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.href}
-                className="text-gray-600 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-gray-600 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium transition-colors"
               >
                 {item.label}
               </Link>
             ))}
-            <Link to="/login" className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors">
+            <Link to="/login" className="bg-purple-600 text-white px-4 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors">
               Sign In
             </Link>
           </div>
@@ -69,7 +69,7 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-            <Link to="/login" className="w-full bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-700 transition-colors">
+            <Link to="/login" className="w-full bg-purple-600 text-white px-4 py-2 rounded-md text-base font-medium hover:bg-purple-700 transition-colors">
               Sign In
             </Link>
           </div>

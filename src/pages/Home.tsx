@@ -18,48 +18,31 @@ function Home() {
     }
   }, []);
 
-  // Add stats animation
   const [stats, setStats] = useState({
     brands: 0,
     influencers: 0,
     campaigns: 0
   });
+  const [error, setError] = useState('');
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/stats'); // Ensure the correct URL
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+      const data = await response.json();
+      console.log('Fetched Stats Data:', data); // Log the fetched data
+      setStats(data);
+    } catch (err) {
+      setError('Failed to load stats');
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    // Animate stats on scroll
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateStats();
-        }
-      });
-    });
-
-    const statsSection = document.querySelector('#stats-section');
-    if (statsSection) observer.observe(statsSection);
-
-    return () => observer.disconnect();
+    fetchStats();
   }, []);
-
-  const animateStats = () => {
-    const targetStats = { brands: 500, influencers: 2000, campaigns: 1500 };
-    const duration = 2000; // 2 seconds
-    const steps = 50;
-    const interval = duration / steps;
-
-    let currentStep = 0;
-
-    const timer = setInterval(() => {
-      currentStep++;
-      setStats({
-        brands: Math.round((targetStats.brands / steps) * currentStep),
-        influencers: Math.round((targetStats.influencers / steps) * currentStep),
-        campaigns: Math.round((targetStats.campaigns / steps) * currentStep)
-      });
-
-      if (currentStep === steps) clearInterval(timer);
-    }, interval);
-  };
 
   return (
     <main>

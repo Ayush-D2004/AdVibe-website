@@ -145,7 +145,11 @@ export function RegistrationForm({ type }: RegistrationFormProps) {
         user_type: type,
         profile_data: formData
       });
-      navigate('/workspace');
+      if (type === 'business') {
+        navigate('/workspace');
+      } else {
+        navigate('/workspace/influencer');
+      }
     } catch (error) {
       setError('Registration failed. Please try again.');
     } finally {

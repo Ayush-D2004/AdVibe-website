@@ -16,8 +16,13 @@ const SignIn = () => {
     setIsSubmitting(true);
 
     try {
-      await authService.signIn(email, password);
-      navigate('/workspace'); // Redirect to the workspace or dashboard after successful login
+      const user = await authService.signIn(email, password);
+      // Redirect based on user type
+      if (user.user_type === 'business') {
+        navigate('/workspace'); // Redirect to business workspace
+      } else {
+        navigate('/workspace/influencer'); // Redirect to influencer workspace
+      }
     } catch (error) {
       setError('Login failed. Please check your credentials and try again.');
     } finally {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MessageSquare, Calendar, BarChart2, Users, Image, Plus, Bell } from 'lucide-react';
+// import React from 'react';
+import { MessageSquare, Calendar, BarChart2, Users, Plus, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Message {
@@ -34,8 +34,6 @@ interface CollaborationRequest {
 }
 
 const InfluencerDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  
   const messages: Message[] = [
     {
       id: 1,

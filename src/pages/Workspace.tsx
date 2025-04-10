@@ -10,6 +10,7 @@ import Calendar from './workspace/Calendar';
 import Documents from './workspace/Documents';
 import Settings from './workspace/Settings';
 import Support from './workspace/Support';
+import InfluencerWorkspace from './workspace/InfluencerWorkspace';
 
 const Workspace = () => {
   return (
@@ -26,6 +27,7 @@ const Workspace = () => {
             <Route path="/documents" element={<Documents />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/influencer" element={<InfluencerWorkspace />} />
           </Routes>
         </div>
       </div>
